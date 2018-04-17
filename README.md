@@ -3,7 +3,7 @@
 This Docker is largely based on [earlier work](https://github.com/jcsilva/docker-kaldi-gstreamer-server).
 
 The environment that is built with this dockerfile allows for running a Dutch ASR server, 
-as well as doing offline recognition in similar manner as what would be possible with my [Kaldi-NL setup](https://github.com/opensource-spraakherkenning-nl/Kaldi_NL).
+as well as doing offline recognition in a similar manner as what would be possible with my [Kaldi-NL setup](https://github.com/opensource-spraakherkenning-nl/Kaldi_NL).
 During the installation process, the (precompiled) Dutch ASR models are downloaded and extracted so you can start using it straight away.
 
 You can build the Docker using:
