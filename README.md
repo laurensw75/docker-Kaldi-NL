@@ -8,7 +8,7 @@ During the installation process, the (precompiled) Dutch ASR models are download
 
 You can build the Docker using:
 
-`docker build -t kaldi_nl:1.0 Kaldi_NL_server`
+`docker build -t kaldi_nl:1.0 docker-Kaldi-NL`
 
 Once the environment is built, you can run it with:
 
