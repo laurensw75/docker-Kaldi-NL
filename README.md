@@ -6,11 +6,15 @@ The environment that is built with this dockerfile allows for running a Dutch AS
 as well as doing offline recognition in a similar manner as what would be possible with my [Kaldi-NL setup](https://github.com/opensource-spraakherkenning-nl/Kaldi_NL).
 During the installation process, the (precompiled) Dutch ASR models are downloaded and extracted so you can start using it straight away.
 
-You can build the Docker using:
+The pre-built docker can be retrieved using:
 
-`docker build -t kaldi_nl:1.0 docker-Kaldi-NL`
+`docker pull laurensw/kaldi_nl_server`
 
-Once the environment is built, you can run it with:
+Or you can build the Docker using:
+
+`docker build -t kaldi_nl:1.0 https://github.com/laurensw75/docker-Kaldi-NL`
+
+Once the environment is ready, you can run it with:
 
 `docker run -it -p 8888:80 kaldi_nl:1.0`
 
