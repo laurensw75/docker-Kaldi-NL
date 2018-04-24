@@ -18,6 +18,8 @@ Once the environment is ready, you can run it with:
 
 `docker run -it -p 8888:80 kaldi_nl:1.0`
 
+(or with `docker run -it -p 8888:80 laurensw/kaldi_nl_server` if you took the pre-built image)
+
 This ensures that port 80 that is used within the Docker as the server port, is mapped to 8888 for use outside the Docker.
 Once inside the Docker, you can simply type start.sh to start the ASR server, and stop.sh to stop it.
 The server can be tested using my example [Java application](https://github.com/laurensw75/SpeechAPIDemo), which should then be started with localhost:8888 as parameters.
