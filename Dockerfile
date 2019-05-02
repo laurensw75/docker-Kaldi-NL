@@ -48,16 +48,30 @@ RUN wget http://www.digip.org/jansson/releases/jansson-2.7.tar.bz2 && \
     echo "/usr/local/lib" >> /etc/ld.so.conf.d/jansson.conf && ldconfig && \
     rm /opt/jansson-2.7.tar.bz2 && rm -rf /opt/jansson-2.7
 
+RUN apt-get install -y \
+    time \
+    sox \
+    libsox-fmt-mp3 \
+    default-jre \
+    unzip
+
 RUN git clone https://github.com/kaldi-asr/kaldi && \
     cd /opt/kaldi/tools && \
     make -j${NUM_BUILD_CORES} && \
-    ./install_portaudio.sh && \
-    cd /opt/kaldi/src && ./configure --shared && \
+    ./install_portaudio.sh
+    
+RUN cd /opt/kaldi/tools && \
+    extras/install_mkl.sh
+
+# RUN cd /opt/kaldi/src && ./configure --shared --mathlib=OPENBLAS && \
+ 
+RUN cd /opt/kaldi/src && ./configure --shared && \
     sed -i '/-g # -O0 -DKALDI_PARANOID/c\-O3 -DNDEBUG' kaldi.mk && \
     make depend && make -j${NUM_BUILD_CORES} && \
     cd /opt/kaldi/src/online && make depend && make -j${NUM_BUILD_CORES} && \
-    cd /opt/kaldi/src/gst-plugin && make depend && make -j${NUM_BUILD_CORES} && \
-    cd /opt && \
+    cd /opt/kaldi/src/gst-plugin && make depend && make -j${NUM_BUILD_CORES}
+
+RUN cd /opt && \
     git clone https://github.com/alumae/gst-kaldi-nnet2-online.git && \
     cd /opt/gst-kaldi-nnet2-online/src && \
     sed -i '/KALDI_ROOT?=\/home\/tanel\/tools\/kaldi-trunk/c\KALDI_ROOT?=\/opt\/kaldi' Makefile && \
@@ -83,12 +97,6 @@ RUN chmod +x /opt/start.sh && \
 # The following bit gives you the scripts for offline transcription.
 # It requires Java and some other things, so if you don't need it you
 # may want to skip this section.
-
-RUN apt-get install -y \
-    time \
-    sox \
-    libsox-fmt-mp3 \
-    default-jre
 
 COPY Kaldi_NL.tar.gz /opt/
 RUN  cd /opt && tar -xvzf Kaldi_NL.tar.gz && rm Kaldi_NL.tar.gz && \
