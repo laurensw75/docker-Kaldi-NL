@@ -23,6 +23,7 @@ import tornado.web
 import tornado.websocket
 import tornado.gen
 import tornado.concurrent
+import concurrent.futures
 import settings
 import common
 
@@ -105,7 +106,6 @@ def content_type_to_caps(content_type):
     else:
         return content_type
 
-
 @tornado.web.stream_request_body
 class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
     """
@@ -123,6 +123,8 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
         self.worker = None
         self.error_status = 0
         self.error_message = None
+        #Waiter thread for final hypothesis:
+        self.executor = concurrent.futures.ThreadPoolExecutor(max_workers=1) 
         try:
             self.worker = self.application.available_workers.pop()
             self.application.send_status_update()
@@ -150,11 +152,18 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
 
     def put(self, *args, **kwargs):
         self.end_request(args, kwargs)
-
-    @run_async
+    
+    def options(self, *args, **kwargs):
+        self.set_header('Access-Control-Allow-Origin', '*')
+        self.set_header('Access-Control-Allow-Methods', 'POST, PUT, OPTIONS')
+        self.set_header('Access-Control-Max-Age', 1000)
+        # note that '*' is not valid for Access-Control-Allow-Headers
+        self.set_header('Access-Control-Allow-Headers',  'origin, x-csrftoken, content-type, accept, User-Id, Content-Id')
+    
+    @tornado.concurrent.run_on_executor
     def get_final_hyp(self, callback=None):
         logging.info("%s: Waiting for final result..." % self.id)
-        callback(self.final_result_queue.get(block=True))
+        return self.final_result_queue.get(block=True)
 
     @tornado.web.asynchronous
     @tornado.gen.coroutine
@@ -163,7 +172,7 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
         assert self.worker is not None
         self.worker.write_message("EOS", binary=True)
         logging.info("%s: yielding..." % self.id)
-        hyp = yield tornado.gen.Task(self.get_final_hyp)
+        hyp = yield self.get_final_hyp()
         if self.error_status == 0:
             logging.info("%s: Final hyp: %s" % (self.id, hyp))
             response = {"status" : 0, "id": self.id, "hypotheses": [{"utterance" : hyp}]}
@@ -200,7 +209,6 @@ class HttpChunkedRecognizeHandler(tornado.web.RequestHandler):
     def close(self):
         logging.info("%s: Receiving 'close' from worker" % (self.id))
         self.final_result_queue.put(self.final_hyp)
-
 
 class ReferenceHandler(tornado.web.RequestHandler):
     def post(self, *args, **kwargs):
