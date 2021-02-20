@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y  \
     bzip2 \
     g++ \
     git \
+    gfortran \
     gstreamer1.0-plugins-good \
     gstreamer1.0-tools \
     gstreamer1.0-pulseaudio \
